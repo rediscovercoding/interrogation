@@ -213,6 +213,27 @@ const sizes = {
 //Scene
 const scene = new THREE.Scene();
 
+//model gltf
+// Draco loader
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath("draco/");
+
+// GLTF loader
+const gltfLoader = new GLTFLoader();
+gltfLoader.setDRACOLoader(dracoLoader);
+
+//Model gltf
+const model = gltfLoader.load("interrogation2.glb", (gltf) => {
+  gltf.scene.traverse(function (node) {
+    if (node.isMesh) {
+      node.receiveShadow = true;
+      node.castShadow = true;
+    }
+  });
+
+  scene.add(gltf.scene);
+});
+
 //Objects
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshNormalMaterial();
@@ -220,14 +241,18 @@ const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
 
 //iframe Object
+//first create a dom element, iframe used to show another page
 const element = document.createElement("div");
 element.innerHTML = '<iframe src="https://threejs.org/"  ></iframe>';
-
+//create a CSS3DObject and add the dom element to it
 const page = new CSS3DObject(element);
-page.scale.set(0.0032, 0.0063, 0.005);
-page.position.z = 0.5;
-page.position.x = 0;
-page.position.y = -0.015;
+page.scale.set(0.006, 0.012, 0.01);
+page.position.z = 1.7;
+page.position.x = -2.6;
+page.position.y = 3.6;
+page.rotation.y = 0;
+page.rotation.z = -1.575;
+page.rotation.x = -1.6;
 scene.add(page);
 
 //Camera
@@ -237,10 +262,28 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   100
 );
-camera.position.z = 3;
-camera.position.x = 3;
-camera.position.y = 3;
+camera.position.z = 10;
+camera.position.x = 10;
+camera.position.y = 8;
+
 scene.add(camera);
+
+//Lights
+//Ambient Light
+const ambientLight = new THREE.AmbientLight("0x0000ff", 0.85);
+scene.add(ambientLight);
+
+//direction light
+const directionalLight = new THREE.DirectionalLight("#ffffff", 2);
+directionalLight.position.set(5, 5, 5);
+//scene.add(directionalLight);
+
+//SpotLight
+const spotLight = new THREE.SpotLight(0xffffff, 10, 15, 0.65, 0.25);
+spotLight.position.y = 10;
+5;
+spotLight.castShadow = true;
+scene.add(spotLight);
 
 //Renderers
 //WebGL Renderer
@@ -258,6 +301,12 @@ document.body.appendChild(renderer2.domElement);
 
 //Controls
 const orbitControl = new OrbitControls(camera, renderer1.domElement);
+
+//GUI
+const gui = new dat.GUI();
+gui.add(camera.position, "y", -50, 50);
+gui.add(camera.position, "x", -50, 50);
+gui.add(camera.position, "z", -50, 50);
 
 //Render or Animate
 
